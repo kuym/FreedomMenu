@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E80877BA186DFF7F00FAA8E6 /* Status.png in Resources */ = {isa = PBXBuildFile; fileRef = E80877B6186DFF7F00FAA8E6 /* Status.png */; };
+		E80877BC186DFF7F00FAA8E6 /* StatusHighlighted.png in Resources */ = {isa = PBXBuildFile; fileRef = E80877B8186DFF7F00FAA8E6 /* StatusHighlighted.png */; };
 		E8463EEF186D5D0C00D59500 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8463EEE186D5D0C00D59500 /* Cocoa.framework */; };
 		E8463EF9186D5D0C00D59500 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E8463EF7186D5D0C00D59500 /* InfoPlist.strings */; };
 		E8463F0E186D5D0C00D59500 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8463F0D186D5D0C00D59500 /* XCTest.framework */; };
@@ -25,6 +27,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E80877B6186DFF7F00FAA8E6 /* Status.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Status.png; path = FreedomMenu/Status.png; sourceTree = "<group>"; };
+		E80877B8186DFF7F00FAA8E6 /* StatusHighlighted.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = StatusHighlighted.png; path = FreedomMenu/StatusHighlighted.png; sourceTree = "<group>"; };
 		E8463EEB186D5D0C00D59500 /* FreedomMenu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FreedomMenu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8463EEE186D5D0C00D59500 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		E8463EF1186D5D0C00D59500 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -58,9 +62,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E80877BE186DFF8500FAA8E6 /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				E80877B6186DFF7F00FAA8E6 /* Status.png */,
+				E80877B8186DFF7F00FAA8E6 /* StatusHighlighted.png */,
+			);
+			name = Images;
+			sourceTree = "<group>";
+		};
 		E8463EE2186D5D0C00D59500 = {
 			isa = PBXGroup;
 			children = (
+				E80877BE186DFF8500FAA8E6 /* Images */,
 				E8463EF4186D5D0C00D59500 /* FreedomMenu */,
 				E8463EED186D5D0C00D59500 /* Frameworks */,
 				E8463EEC186D5D0C00D59500 /* Products */,
@@ -183,6 +197,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8463EF9186D5D0C00D59500 /* InfoPlist.strings in Resources */,
+				E80877BC186DFF7F00FAA8E6 /* StatusHighlighted.png in Resources */,
+				E80877BA186DFF7F00FAA8E6 /* Status.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -384,6 +400,7 @@
 				E8463F1E186D5D0C00D59500 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		E8463F1F186D5D0C00D59500 /* Build configuration list for PBXNativeTarget "FreedomMenuTests" */ = {
 			isa = XCConfigurationList;
@@ -392,6 +409,7 @@
 				E8463F21186D5D0C00D59500 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -1,19 +1,40 @@
-//#import "AppDelegate.h"
 #include <Cocoa/Cocoa.h>
+#include <CoreGraphics/CoreGraphics.h>
 
-@class MenubarView;
+@class MenubarController;
 
-@interface FreedomMenu : NSObject <NSApplicationDelegate>
+@interface FreedomMenuApp: NSObject <NSApplicationDelegate>
 {
 @private
-	MenubarView*	_menubarView;
+	MenubarController*	_menubarController;
 }
-//@property (assign) IBOutlet NSWindow *window;
 
 @end
 
 
-@interface MenubarView : NSView
+////////////////////////////////////////////////////////////////
+
+
+@class MenubarView;
+
+@interface MenubarController: NSObject
+{
+@private
+	MenubarView*	_menubarView;
+}
+
+//@property (nonatomic) BOOL hasActiveIcon;
+@property (nonatomic, strong, readonly) MenubarView* statusItemView;
+
+
+
+@end
+
+
+////////////////////////////////////////////////////////////////
+
+
+@interface MenubarView: NSView <NSMenuDelegate>
 {
 @private
 	NSImage*		_image;
@@ -26,7 +47,83 @@
 
 - (id)initWithStatusItem:(NSStatusItem *)statusItem;
 
+- (void)setImage:(NSImage*)newImage;
+- (void)setHighlightImage:(NSImage*)newImage;
+- (void)setMenu:(NSMenu*)menu;
+- (void)setHighlighted:(BOOL)newFlag;
+- (void)setAction:(SEL)action onTarget:(id)target;
+
 @property (nonatomic, strong, readonly) NSStatusItem* statusItem;
+@property (nonatomic, setter = setHighlighted:) BOOL isHighlighted;
+
+@end
+
+
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+
+
+@implementation FreedomMenuApp
+
+- (void)applicationDidFinishLaunching:(NSNotification* )aNotification
+{
+	_menubarController = [[MenubarController alloc] init];
+}
+
+@end
+
+
+////////////////////////////////////////////////////////////////
+
+
+@implementation MenubarController
+
+- (id)init
+{
+	NSStatusItem* statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSSquareStatusItemLength];
+	
+	[statusItem setHighlightMode:YES];
+	
+	_menubarView = [[MenubarView alloc] initWithStatusItem:statusItem];
+	
+	[_menubarView setImage:[NSImage imageNamed:@"Status"]];
+	[_menubarView setHighlightImage:[NSImage imageNamed:@"StatusHighlighted"]];
+	//[_menubarView setAction:@selector(doStuff:) onTarget:self];
+	
+	//build a menu
+	NSMenu* menu = [[NSMenu alloc] initWithTitle:@"FreedomMenu"];
+	[menu insertItemWithTitle:@"Used: 1% (35MB of 500MB)" action:nil keyEquivalent:@"" atIndex:0];
+	[[menu insertItemWithTitle:@"FreedomPop Account..." action:@selector(goToAccount:) keyEquivalent:@"" atIndex:1] setTarget:self];
+	[menu insertItem:[NSMenuItem separatorItem] atIndex:2];
+	[[menu insertItemWithTitle:@"Settings..." action:@selector(showSettings:) keyEquivalent:@"" atIndex:3] setTarget:self];
+	
+	[_menubarView setMenu:menu];
+	
+	return(self);
+}
+
+/*- (IBAction)doStuff:(id)sender
+{
+	printf("Clicked!\n");
+	
+	//[_menubarView.statusItem popUpStatusItemMenu:[_menubarView.statusItem menu]];
+}*/
+
+- (IBAction)goToAccount:(id)sender
+{
+	printf("Going to account...\n");
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://www.freedompop.com/acct_usage.htm"]];
+}
+
+- (IBAction)showSettings:(id)sender
+{
+	printf("Showing settings...\n");
+}
+
+- (void)dealloc
+{
+	[[NSStatusBar systemStatusBar] removeStatusItem:[_menubarView statusItem]];
+}
 
 @end
 
@@ -58,19 +155,71 @@
 {
 	[self.statusItem drawStatusBarBackgroundInRect:dirtyRect withHighlight:_isHighlighted];
 	
-	NSImage* icon = _isHighlighted ? _highlightImage : _image;
-	NSSize iconSize = [icon size];
-	NSRect bounds = self.bounds;
-	CGFloat iconX = roundf((NSWidth(bounds) - iconSize.width) / 2);
-	CGFloat iconY = roundf((NSHeight(bounds) - iconSize.height) / 2);
-	NSPoint iconPoint = NSMakePoint(iconX, iconY);
+	
+	/*
+	CGAffineTransform mtx = CGAffineTransformMake(24.f, 0.f, 0.f, 24.f, 0.f, 0.f);
+	CGContextConcatCTM(context, mtx);
+	
+	CGContextSetLineWidth(context, 0.04166f);
+	CGColorRef color = CGColorGetConstantColor(kCGColorBlack);
+	CGContextSetStrokeColorWithColor(context, color);
+	
+	CGContextMoveToPoint(context, 0.f, 0.618f);
+	CGContextAddLineToPoint(context, 1.f, 1.f);
+	CGContextStrokePath(context);
+	*/
 
-	[icon drawAtPoint:iconPoint fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+	NSImage* icon = _isHighlighted ? _highlightImage : _image;
+	
+	if(icon)
+	{
+		NSSize iconSize = [icon size];
+		NSRect bounds = self.bounds;
+		CGFloat iconX = roundf((NSWidth(bounds) - iconSize.width) / 2);
+		CGFloat iconY = roundf((NSHeight(bounds) - iconSize.height) / 2);
+		NSPoint iconPoint = NSMakePoint(iconX, iconY);
+
+		CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
+
+		[icon drawAtPoint:iconPoint fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+		
+		if(_isHighlighted)	CGContextSetRGBFillColor(context, 0.99f, 0.99f, 0.99f, 1.f);
+		else				CGContextSetRGBFillColor(context, 0.08f, 0.08f, 0.08f, 1.f);
+		CGContextFillRect(context, CGRectMake(iconX + 3.f, iconY + 3.f, 13.f, 5.f));
+	}
+}
+
+- (void)setAction:(SEL)action onTarget:(id)target
+{
 }
 
 - (void)mouseDown:(NSEvent*)theEvent
 {
-	[NSApp sendAction:_action to:_target from:self];
+	NSMenu* menu = [_statusItem menu];
+	[_statusItem popUpStatusItemMenu:menu];
+	[self setHighlighted:NO];
+	[self setNeedsDisplay:YES];
+	//[NSApp sendAction:_action to:_target from:self];
+}
+
+- (void)menuWillOpen:(NSMenu*)menu
+{
+	[self setHighlighted:YES];
+	[self setNeedsDisplay:YES];
+}
+
+- (void)menuDidClose:(NSMenu*)menu
+{
+	[self setHighlighted:NO];
+	[self setNeedsDisplay:YES];
+}
+
+
+
+- (void)setMenu:(NSMenu*)menu
+{
+	[menu setDelegate:self];
+	[_statusItem setMenu:menu];
 }
 
 - (void)setHighlighted:(BOOL)newFlag
@@ -82,6 +231,12 @@
 	}
 }
 
+/*- (void)setAction:(SEL)action onTarget:(id)target
+{
+	_action = action;
+	_target = target;
+}*/
+
 - (void)setImage:(NSImage*)newImage
 {
 	if(_image != newImage)
@@ -91,7 +246,7 @@
 	}
 }
 
-- (void)setAlternateImage:(NSImage*)newImage
+- (void)setHighlightImage:(NSImage*)newImage
 {
 	if(_highlightImage != newImage)
 	{
@@ -111,29 +266,12 @@
 @end
 
 
-
-
-@implementation FreedomMenu
-
-- (void)applicationDidFinishLaunching:(NSNotification* )aNotification
-{
-	NSStatusItem* statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:24.0];
-	
-	_menubarView = [[MenubarView alloc] initWithStatusItem:statusItem];
-}
-
-- (void)dealloc
-{
-	[[NSStatusBar systemStatusBar] removeStatusItem:[_menubarView statusItem]];
-}
-
-@end
-
+////////////////////////////////////////////////////////////////
 
 
 int main(int argc, const char * argv[])
 {
-	FreedomMenu* application = [[FreedomMenu alloc] init];
+	FreedomMenuApp* application = [[FreedomMenuApp alloc] init];
 
 	// carbon voodoo to get icon and menu without bundle
 	//ProcessSerialNumber psn = { 0, kCurrentProcess };
