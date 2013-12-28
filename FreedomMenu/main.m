@@ -400,6 +400,7 @@ typedef enum
 	NSData* htmlNodeOfInterest = [NSData dataWithBytes:searchString length:searchStringLen];
 	NSRange found = [_response rangeOfData:htmlNodeOfInterest options:0 range:NSMakeRange(0, [_response length])];
 	
+	BOOL valid = NO;
 	if(found.location != NSNotFound)
 	{
 		//printf("found at %lu, %lu\n", (unsigned long)found.location, (unsigned long)found.length);
@@ -418,16 +419,19 @@ typedef enum
 			if((usedPercentage >= 0) && (usedPercentage <= 100))
 			{
 				_usedQuotient = (((float)usedPercentage) / 100.f);
+				valid = YES;
 				
 				//printf("Used quotient is %f\n", _usedQuotient);
-				
-				if(_usedQuotientOnChange != nil)
-					[NSApp sendAction:_usedQuotientOnChange to:_usedQuotientOnChangeTarget from:self];
 			}
 		}
 	}
-	
 	_response = nil;
+	
+	if(!valid)
+		_usedQuotient = -1.f;
+		
+	if(_usedQuotientOnChange != nil)
+		[NSApp sendAction:_usedQuotientOnChange to:_usedQuotientOnChangeTarget from:self];
 }
 
 
