@@ -264,13 +264,11 @@ typedef enum
 
 - (id)initWithUsername:(NSString *)username password:(NSString *)password
 {
+	self = [self init];
+	
 	_username = username;
 	_password = password;
-	_response = nil;
-	_usedQuotient = -1.f;
-	_updateImminent = NO;
 	
-	_timerPeriod = 3600.f;	// update by default each hour
 	[self checkNow];
 	
 	return(self);
@@ -352,7 +350,9 @@ typedef enum
 
 - (void)connection:(NSURLConnection*)connection didFailWithError:(NSError*)error
 {
-	//printf("error.\n");
+	[self setUsedQuotient:-1.f];
+	
+	printf("error.\n");
 }
 
 - (NSURLRequest*)connection:(NSURLConnection*)connection willSendRequest:(NSURLRequest*)request redirectResponse:(NSURLResponse*)response
@@ -418,7 +418,7 @@ typedef enum
 			
 			if((usedPercentage >= 0) && (usedPercentage <= 100))
 			{
-				_usedQuotient = (((float)usedPercentage) / 100.f);
+				[self setUsedQuotient:(((float)usedPercentage) / 100.f)];
 				valid = YES;
 				
 				//printf("Used quotient is %f\n", _usedQuotient);
@@ -428,8 +428,12 @@ typedef enum
 	_response = nil;
 	
 	if(!valid)
-		_usedQuotient = -1.f;
-		
+		[self setUsedQuotient: -1.f];
+}
+
+- (void) setUsedQuotient:(float)quotient
+{
+	_usedQuotient = quotient;
 	if(_usedQuotientOnChange != nil)
 		[NSApp sendAction:_usedQuotientOnChange to:_usedQuotientOnChangeTarget from:self];
 }
