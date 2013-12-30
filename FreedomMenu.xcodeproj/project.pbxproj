@@ -11,6 +11,11 @@
 		E80877BC186DFF7F00FAA8E6 /* StatusHighlighted.png in Resources */ = {isa = PBXBuildFile; fileRef = E80877B8186DFF7F00FAA8E6 /* StatusHighlighted.png */; };
 		E80877C1186F81E800FAA8E6 /* StatusInd.png in Resources */ = {isa = PBXBuildFile; fileRef = E80877BF186F81E800FAA8E6 /* StatusInd.png */; };
 		E80877C2186F81E800FAA8E6 /* StatusIndHighlighted.png in Resources */ = {isa = PBXBuildFile; fileRef = E80877C0186F81E800FAA8E6 /* StatusIndHighlighted.png */; };
+		E80877C4186FCADA00FAA8E6 /* SettingsWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E80877C3186FCADA00FAA8E6 /* SettingsWindow.xib */; };
+		E80877C6186FDA0800FAA8E6 /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = E80877C5186FDA0800FAA8E6 /* logo.png */; };
+		E80877C8186FE5F100FAA8E6 /* FreedomStick.png in Resources */ = {isa = PBXBuildFile; fileRef = E80877C7186FE5F100FAA8E6 /* FreedomStick.png */; };
+		E812590A187003A000914BCE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8125909187003A000914BCE /* Security.framework */; };
+		E812590D18712E1A00914BCE /* SSKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = E812590C18712E1A00914BCE /* SSKeychain.m */; };
 		E8463EEF186D5D0C00D59500 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8463EEE186D5D0C00D59500 /* Cocoa.framework */; };
 		E8463EF9186D5D0C00D59500 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E8463EF7186D5D0C00D59500 /* InfoPlist.strings */; };
 		E8463F0E186D5D0C00D59500 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8463F0D186D5D0C00D59500 /* XCTest.framework */; };
@@ -33,6 +38,12 @@
 		E80877B8186DFF7F00FAA8E6 /* StatusHighlighted.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = StatusHighlighted.png; path = FreedomMenu/StatusHighlighted.png; sourceTree = "<group>"; };
 		E80877BF186F81E800FAA8E6 /* StatusInd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = StatusInd.png; path = FreedomMenu/StatusInd.png; sourceTree = "<group>"; };
 		E80877C0186F81E800FAA8E6 /* StatusIndHighlighted.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = StatusIndHighlighted.png; path = FreedomMenu/StatusIndHighlighted.png; sourceTree = "<group>"; };
+		E80877C3186FCADA00FAA8E6 /* SettingsWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SettingsWindow.xib; sourceTree = "<group>"; };
+		E80877C5186FDA0800FAA8E6 /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo.png; path = FreedomMenu/logo.png; sourceTree = "<group>"; };
+		E80877C7186FE5F100FAA8E6 /* FreedomStick.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = FreedomStick.png; path = FreedomMenu/FreedomStick.png; sourceTree = "<group>"; };
+		E8125909187003A000914BCE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		E812590B18712E1A00914BCE /* SSKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSKeychain.h; sourceTree = "<group>"; };
+		E812590C18712E1A00914BCE /* SSKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSKeychain.m; sourceTree = "<group>"; };
 		E8463EEB186D5D0C00D59500 /* FreedomMenu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FreedomMenu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8463EEE186D5D0C00D59500 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		E8463EF1186D5D0C00D59500 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -50,6 +61,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E812590A187003A000914BCE /* Security.framework in Frameworks */,
 				E8463EEF186D5D0C00D59500 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -69,10 +81,13 @@
 		E80877BE186DFF8500FAA8E6 /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				E80877C7186FE5F100FAA8E6 /* FreedomStick.png */,
+				E80877C5186FDA0800FAA8E6 /* logo.png */,
 				E80877BF186F81E800FAA8E6 /* StatusInd.png */,
 				E80877C0186F81E800FAA8E6 /* StatusIndHighlighted.png */,
 				E80877B6186DFF7F00FAA8E6 /* Status.png */,
 				E80877B8186DFF7F00FAA8E6 /* StatusHighlighted.png */,
+				E80877C3186FCADA00FAA8E6 /* SettingsWindow.xib */,
 			);
 			name = Images;
 			sourceTree = "<group>";
@@ -99,6 +114,7 @@
 		E8463EED186D5D0C00D59500 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E8125909187003A000914BCE /* Security.framework */,
 				E8463EEE186D5D0C00D59500 /* Cocoa.framework */,
 				E8463F0D186D5D0C00D59500 /* XCTest.framework */,
 				E8463EF0186D5D0C00D59500 /* Other Frameworks */,
@@ -119,6 +135,8 @@
 		E8463EF4186D5D0C00D59500 /* FreedomMenu */ = {
 			isa = PBXGroup;
 			children = (
+				E812590B18712E1A00914BCE /* SSKeychain.h */,
+				E812590C18712E1A00914BCE /* SSKeychain.m */,
 				E8463F22186D663F00D59500 /* main.m */,
 				E8463EF6186D5D0C00D59500 /* Info.plist */,
 				E8463EF7186D5D0C00D59500 /* InfoPlist.strings */,
@@ -204,7 +222,10 @@
 			files = (
 				E8463EF9186D5D0C00D59500 /* InfoPlist.strings in Resources */,
 				E80877BC186DFF7F00FAA8E6 /* StatusHighlighted.png in Resources */,
+				E80877C4186FCADA00FAA8E6 /* SettingsWindow.xib in Resources */,
+				E80877C8186FE5F100FAA8E6 /* FreedomStick.png in Resources */,
 				E80877BA186DFF7F00FAA8E6 /* Status.png in Resources */,
+				E80877C6186FDA0800FAA8E6 /* logo.png in Resources */,
 				E80877C1186F81E800FAA8E6 /* StatusInd.png in Resources */,
 				E80877C2186F81E800FAA8E6 /* StatusIndHighlighted.png in Resources */,
 			);
@@ -225,6 +246,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8463F23186D663F00D59500 /* main.m in Sources */,
+				E812590D18712E1A00914BCE /* SSKeychain.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

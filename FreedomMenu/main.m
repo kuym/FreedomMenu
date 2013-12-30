@@ -1,6 +1,6 @@
 #include <Cocoa/Cocoa.h>
 #include <CoreGraphics/CoreGraphics.h>
-
+#include "SSKeychain.h"
 
 @implementation NSString (NSString_Extended)
 
@@ -35,12 +35,15 @@
 
 @class MenubarController;
 @class UsageCheckController;
+@class FreedomModel;
 
 @interface FreedomMenuApp: NSObject <NSApplicationDelegate>
 {
 @private
 	MenubarController*		_menubarController;
 	UsageCheckController*	_checkController;
+	
+	FreedomModel*			_model;
 }
 
 @end
@@ -49,18 +52,49 @@
 ////////////////////////////////////////////////////////////////
 
 
+@interface FreedomModel: NSObject
+{
+	float				_usedQuotient;
+	NSString*			_password;
+}
+
+- (NSString*)username;
+- (void)setUsername:(NSString*)username;
+
+- (NSString*)password;
+- (void)setPassword:(NSString*)password;
+
+- (BOOL)autoStart;
+- (void)setAutostart:(BOOL)autostart;
+
+- (NSTimeInterval)updatePeriod;
+- (void)setUpdatePeriod:(NSTimeInterval)interval;
+
+- (float)usedQuotient;
+- (void)setUsedQuotient:(float)usedQuotient;
+
+@end
+
+
+////////////////////////////////////////////////////////////////
+
+
 @class MenubarView;
+@class SettingsWindowController;
 
 @interface MenubarController: NSObject
 {
 @private
-	MenubarView*	_menubarView;
-	NSMenuItem*		_detailItem;
+	MenubarView*				_menubarView;
+	NSMenuItem*					_detailItem;
+	
+	SettingsWindowController*	_settingsWindow;
+	
+	FreedomModel*				_model;
 }
 
-- (void)updateUsedQuotient:(float)quotient;
+- (id)initWithModel:(FreedomModel*)model;
 
-//@property (nonatomic) BOOL hasActiveIcon;
 @property (nonatomic, strong, readonly) MenubarView* statusItemView;
 
 
@@ -71,39 +105,40 @@
 ////////////////////////////////////////////////////////////////
 
 
+@interface SettingsWindowController: NSWindowController
+{
+	FreedomModel* _model;
+}
+
+@property (weak) IBOutlet NSTextField*			usernameField;
+@property (weak) IBOutlet NSTextField*			passwordField;
+@property (weak) IBOutlet NSButton*				autoStartButton;
+@property (weak) IBOutlet NSLevelIndicator*		dataLevel;
+@property (weak) IBOutlet NSProgressIndicator*	indeterminateLevel;
+
+- (id)initWithModel:(FreedomModel*)model;
+
+- (void)showWindow:(id)sender;
+
+@end
+
+////////////////////////////////////////////////////////////////
+
+
 @interface UsageCheckController: NSObject <NSURLConnectionDelegate, NSURLConnectionDataDelegate>
 {
 @private
-	NSString*			_username;
-	NSString*			_password;
-	
 	NSTimer*			_timer;
-	NSTimeInterval		_timerPeriod;
 	BOOL				_updateImminent;
 	
 	NSURLConnection*	_connection;
 	
 	NSMutableData*		_response;
 	
-	float				_usedQuotient;
-	SEL					_usedQuotientOnChange;
-	id					_usedQuotientOnChangeTarget;
+	FreedomModel*		_model;
 }
 
-- (id)initWithUsername:(NSString*)username password:(NSString*)password;
-
-- (void)setUsername:(NSString*)username;
-- (void)setPassword:(NSString*)password;
-
-- (void)onUsedQuotientChanged:(SEL)handler target:(id)target;
-
-- (void)setUpdatePeriod:(NSTimeInterval)interval;
-
-@property (nonatomic, setter = setUsername:) NSString* username;
-@property (nonatomic, setter = setPassword:) NSString* password;
-@property (nonatomic, readonly) float usedQuotient;
-@property (nonatomic, readonly) NSTimeInterval updatePeriod;
-
+- (id)initWithModel:(FreedomModel*)model;
 
 @end
 
@@ -135,7 +170,6 @@ typedef enum
 - (id)initWithStatusItem:(NSStatusItem*)statusItem;
 
 - (void)setImage:(NSImage*)newImage forSlot:(MenubarViewImageSlot)slot;
-//- (void)setHighlightImage:(NSImage*)newImage;
 - (void)setMenu:(NSMenu*)menu;
 - (void)setHighlighted:(BOOL)newFlag;
 - (void)setAction:(SEL)action onTarget:(id)target;
@@ -157,17 +191,147 @@ typedef enum
 
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification
 {
-	_menubarController = [[MenubarController alloc] init];
+	_model = [[FreedomModel alloc] init];
 	
-	_checkController = [[UsageCheckController alloc] initWithUsername:@"YOURUSERNAME" password:@"YOURPASSWORD"];
+	_menubarController = [[MenubarController alloc] initWithModel:_model];
 	
-	[_checkController onUsedQuotientChanged:@selector(onQuotientUpdate) target:self];
+	_checkController = [[UsageCheckController alloc] initWithModel:_model];
 }
 
-- (void)onQuotientUpdate
+@end
+
+
+////////////////////////////////////////////////////////////////
+
+
+@implementation FreedomModel
+
+- (id)init
 {
-	[_menubarController updateUsedQuotient:[_checkController usedQuotient]];
+	_usedQuotient = -1.f;
+	
+	return(self);
 }
+
+- (NSString*)username
+{
+	NSString* username = [[NSUserDefaults standardUserDefaults] stringForKey:@"username"];
+	
+	return(username);
+}
+
+- (void)setUsername:(NSString*)username
+{
+	if([username isEqualToString:[self username]])
+		return;
+	
+	[[NSUserDefaults standardUserDefaults] setObject:username forKey:@"username"];
+	
+	printf("setUsername\n");
+	
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed_username" object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed_account" object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed" object:self];
+}
+
+- (NSString*)password
+{
+	NSString* u = [self username];
+	
+	if(u == nil)
+		return(nil);	//@@raise exception
+	
+	return((_password == nil)? (_password = [SSKeychain passwordForService:@"www.freedompop.com" account:u]) : _password);
+	
+	/*
+	NSString* p = nil;
+	if(_passwordSecurityItem == 0)
+	{
+		unsigned int passwordLength = 0;
+		void* password = 0;
+		SecKeychainFindInternetPassword(	NULL,
+											18, "www.freedompop.com",
+											0, NULL,
+											(unsigned int)[u length], [u cStringUsingEncoding:NSUTF8StringEncoding],
+											0, "",
+											0,
+											kSecProtocolTypeHTTPS, kSecAuthenticationTypeDefault,
+											&passwordLength, &password,
+											0
+										);
+		
+		if((passwordLength > 0) && (password != 0))
+			p = [[NSString alloc] initWithBytes:password length:passwordLength encoding:NSUTF8StringEncoding];
+	}
+	
+	return(p);
+	*/
+}
+
+- (void)setPassword:(NSString*)password
+{
+	if([password isEqualToString:[self password]])
+		return;
+	
+	NSString* u = [self username];
+	
+	if((u == nil) || ([u length] == 0) || (password == nil) || ([password length] == 0))
+		return;	//@@raise exception
+	
+	_password = password;
+	[SSKeychain setPassword:password forService:@"www.freedompop.com" account:u];
+	
+	
+	printf("setPassword\n");
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed_password" object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed_account" object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed" object:self];
+}
+
+- (BOOL)autoStart
+{
+	return([[NSUserDefaults standardUserDefaults] boolForKey:@"autostart"]);
+}
+
+- (void)setAutostart:(BOOL)autostart
+{
+	[[NSUserDefaults standardUserDefaults] setBool:autostart forKey:@"autostart"];
+	
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed_autostart" object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed" object:self];
+}
+
+- (NSTimeInterval)updatePeriod
+{
+	float period = [[NSUserDefaults standardUserDefaults] floatForKey:@"updatePeriod"];
+	
+	return((period == 0.f)? 3600.f : period);
+}
+
+- (void)setUpdatePeriod:(NSTimeInterval)period
+{
+	if(period == 0.f)
+		period = 3600.f;
+	
+	[[NSUserDefaults standardUserDefaults] setFloat:period forKey:@"updatePeriod"];
+	
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed_updatePeriod" object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed" object:self];
+}
+
+- (float)usedQuotient
+{
+	return(_usedQuotient);
+}
+
+- (void)setUsedQuotient:(float)usedQuotient
+{
+	_usedQuotient = usedQuotient;
+	
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed_usedQuotient" object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed" object:self];
+}
+
 
 @end
 
@@ -177,8 +341,10 @@ typedef enum
 
 @implementation MenubarController
 
-- (id)init
+- (id)initWithModel:(FreedomModel*)model
 {
+	_model = model;
+	
 	NSStatusItem* statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSSquareStatusItemLength];
 	
 	[statusItem setHighlightMode:YES];
@@ -190,29 +356,28 @@ typedef enum
 	[_menubarView setImage:[NSImage imageNamed:@"StatusInd"] forSlot:MenubarViewImageSlot_indeterminate_normal];
 	[_menubarView setImage:[NSImage imageNamed:@"StatusIndHighlighted"] forSlot:MenubarViewImageSlot_indeterminate_highlight];
 	
-	//[_menubarView setAction:@selector(doStuff:) onTarget:self];
-	
 	//build a menu
 	NSMenu* menu = [[NSMenu alloc] initWithTitle:@"FreedomMenu"];
 	_detailItem = [menu insertItemWithTitle:@"Used: Currently unknown." action:nil keyEquivalent:@"" atIndex:0];
 	[[menu insertItemWithTitle:@"FreedomPop Account..." action:@selector(goToAccount:) keyEquivalent:@"" atIndex:1] setTarget:self];
 	[menu insertItem:[NSMenuItem separatorItem] atIndex:2];
 	[[menu insertItemWithTitle:@"Settings..." action:@selector(showSettings:) keyEquivalent:@"" atIndex:3] setTarget:self];
+	[[menu insertItemWithTitle:@"Quit" action:@selector(quit:) keyEquivalent:@"" atIndex:4] setTarget:self];
 	
 	[_menubarView setMenu:menu];
+	
+	_settingsWindow = [[SettingsWindowController alloc] initWithModel:_model];
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onUsedQuotientChanged:) name:@"changed_usedQuotient" object:_model];
 	
 	return(self);
 }
 
-/*- (IBAction)doStuff:(id)sender
-{
-	printf("Clicked!\n");
-	
-	//[_menubarView.statusItem popUpStatusItemMenu:[_menubarView.statusItem menu]];
-}*/
 
-- (void)updateUsedQuotient:(float)quotient
+- (void)onUsedQuotientChanged:(NSNotification*)notification
 {
+	float quotient = [_model usedQuotient];
+	
 	[_menubarView setDisplayedQuotient:quotient];
 	
 	if(quotient >= 0.f)
@@ -228,7 +393,14 @@ typedef enum
 
 - (IBAction)showSettings:(id)sender
 {
-	printf("Would show settings...\n");
+	//printf("Showing settings...\n");
+	
+	[_settingsWindow showWindow:self];
+}
+
+- (IBAction)quit:(id)sender
+{
+	[NSApp terminate:self];
 }
 
 - (void)dealloc
@@ -242,66 +414,104 @@ typedef enum
 ////////////////////////////////////////////////////////////////
 
 
+@implementation SettingsWindowController
+
+
+- (id)initWithModel:(FreedomModel*)model
+{
+	self = [super initWithWindowNibName:@"SettingsWindow"];
+	
+	_model = model;
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onUsedQuotientChanged:) name:@"changed_usedQuotient" object:_model];
+
+	return(self);
+}
+
+- (void)onUsedQuotientChanged:(NSNotification*)notification
+{
+	float quotient = [_model usedQuotient];
+	
+	if(quotient >= 0.f)
+	{
+		[[self dataLevel] setIntegerValue:(int)(10.f * (1.f - quotient))];
+		[[self dataLevel] setHidden:NO];
+		[[self indeterminateLevel] setHidden:YES];
+	}
+	else
+	{
+		[[self indeterminateLevel] setHidden:NO];
+		[[self dataLevel] setHidden:YES];
+	}
+}
+
+- (void)showWindow:(id)sender
+{
+	[super showWindow:sender];
+}
+
+- (void)awakeFromNib
+{
+	NSString* username = [_model username];
+	[[self usernameField] setStringValue:(username != nil)? username : @""];
+	
+	NSString* password = (username != nil)? [_model password] : @"";
+	[[self passwordField] setStringValue:(password != nil)? password : @""];
+	
+	[[super window] makeKeyAndOrderFront:self];
+}
+
+- (IBAction)onUsernameChanged:(id)sender
+{
+	[_model setUsername:[[self usernameField] stringValue]];
+}
+
+- (IBAction)onPasswordChanged:(id)sender
+{
+	[_model setPassword:[[self passwordField] stringValue]];
+}
+
+- (IBAction)onAutoStartChanged:(id)sender
+{
+	[_model setAutostart:[[self autoStartButton] intValue]];
+}
+
+@end
+
+
+////////////////////////////////////////////////////////////////
+
+
 @implementation UsageCheckController
 
-@synthesize username = _username;
-@synthesize password = _password;
-@synthesize usedQuotient = _usedQuotient;
-@synthesize updatePeriod = _timerPeriod;
-
-- (id)init
+- (id)initWithModel:(FreedomModel*)model
 {
-	_username = nil;
-	_password = nil;
+	_model = model;
 	_response = nil;
-	_usedQuotient = -1.f;
 	_updateImminent = NO;
 	
-	_timerPeriod = 3600.f;	// update by default each hour
+	[self checkNow];
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onModelChanged:) name:@"changed_account" object:_model];
 	
 	return(self);
 }
 
-- (id)initWithUsername:(NSString *)username password:(NSString *)password
+- (void)dealloc
 {
-	self = [self init];
-	
-	_username = username;
-	_password = password;
-	
-	[self checkNow];
-	
-	return(self);
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (void)setUsername:(NSString*)username
+- (void)onModelChanged:(NSNotification*)notification
 {
-	_username = username;
+	printf("model changed!\n");
 	[self checkNow];
-}
-- (void)setPassword:(NSString*)password
-{
-	_password = password;
-	[self checkNow];
-}
-
-- (void)onUsedQuotientChanged:(SEL)handler target:(id)target
-{
-	_usedQuotientOnChange = handler;
-	_usedQuotientOnChangeTarget = target;
-}
-
-- (void)setUpdatePeriod:(NSTimeInterval)interval
-{
-	_timerPeriod = interval;
-	if(!_updateImminent)
-		[self scheduleCheckIn:_timerPeriod];
 }
 
 - (void)checkNow
 {
 	_updateImminent = YES;
-	_timer = [NSTimer scheduledTimerWithTimeInterval:1.f target:self selector:@selector(performCheck:) userInfo:self repeats:NO];
+	_timer = [NSTimer scheduledTimerWithTimeInterval:10.f target:self selector:@selector(performCheck:) userInfo:self repeats:NO];
 }
 
 - (void)scheduleCheckIn:(NSTimeInterval)seconds
@@ -318,13 +528,16 @@ typedef enum
 {
 	_updateImminent = NO;
 	
-	[self scheduleCheckIn:_timerPeriod];
+	[self scheduleCheckIn:[_model updatePeriod]];
 	
 	//printf("checking now...\n");
 	
-	if((_username == nil) || (_password == nil))
+	NSString* username = [_model username];
+	NSString* password = [_model password];
+	
+	if((username == nil) || (password == nil))
 	{
-		//printf("unable to check, no username or password.\n");
+		printf("unable to check, no username or password.\n");
 		return;
 	}
 		
@@ -334,8 +547,8 @@ typedef enum
 	[request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
 	
 	NSString* post = [NSString stringWithFormat: @"signin-username-full=%@&signin-password-full=%@&destinationURL=http://www.freedompop.com/acct_usage.htm&requestOrigin=",
-							[_username urlencode],
-							[_password urlencode]
+							[username urlencode],
+							[password urlencode]
 						];
 	
 	NSData* postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
@@ -350,7 +563,7 @@ typedef enum
 
 - (void)connection:(NSURLConnection*)connection didFailWithError:(NSError*)error
 {
-	[self setUsedQuotient:-1.f];
+	[_model setUsedQuotient:-1.f];
 	
 	printf("error.\n");
 }
@@ -418,24 +631,15 @@ typedef enum
 			
 			if((usedPercentage >= 0) && (usedPercentage <= 100))
 			{
-				[self setUsedQuotient:(((float)usedPercentage) / 100.f)];
+				[_model setUsedQuotient:(((float)usedPercentage) / 100.f)];
 				valid = YES;
-				
-				//printf("Used quotient is %f\n", _usedQuotient);
 			}
 		}
 	}
 	_response = nil;
 	
 	if(!valid)
-		[self setUsedQuotient: -1.f];
-}
-
-- (void) setUsedQuotient:(float)quotient
-{
-	_usedQuotient = quotient;
-	if(_usedQuotientOnChange != nil)
-		[NSApp sendAction:_usedQuotientOnChange to:_usedQuotientOnChangeTarget from:self];
+		[_model setUsedQuotient: -1.f];
 }
 
 
@@ -525,7 +729,6 @@ typedef enum
 	[_statusItem popUpStatusItemMenu:menu];
 	[self setHighlighted:NO];
 	[self setNeedsDisplay:YES];
-	//[NSApp sendAction:_action to:_target from:self];
 }
 
 - (void)menuWillOpen:(NSMenu*)menu
@@ -556,12 +759,6 @@ typedef enum
 		[self setNeedsDisplay:YES];
 	}
 }
-
-/*- (void)setAction:(SEL)action onTarget:(id)target
-{
-	_action = action;
-	_target = target;
-}*/
 
 - (void)setImage:(NSImage*)newImage forSlot:(MenubarViewImageSlot)slot
 {
