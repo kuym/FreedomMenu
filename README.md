@@ -12,4 +12,5 @@ directly, so **you do not need to be connected with a FreedomPop device for this
 
 Uses [SSKeychain](https://github.com/samsoffes/sskeychain) from Sam Soffes.
 
-**Currently under development.**
+== Status
+**Alpha** - Feature-complete and works correctly, may have bugs.
