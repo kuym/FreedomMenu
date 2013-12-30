@@ -358,11 +358,13 @@ typedef enum
 	
 	//build a menu
 	NSMenu* menu = [[NSMenu alloc] initWithTitle:@"FreedomMenu"];
-	_detailItem = [menu insertItemWithTitle:@"Used: Currently unknown." action:nil keyEquivalent:@"" atIndex:0];
-	[[menu insertItemWithTitle:@"FreedomPop Account..." action:@selector(goToAccount:) keyEquivalent:@"" atIndex:1] setTarget:self];
-	[menu insertItem:[NSMenuItem separatorItem] atIndex:2];
-	[[menu insertItemWithTitle:@"Settings..." action:@selector(showSettings:) keyEquivalent:@"" atIndex:3] setTarget:self];
-	[[menu insertItemWithTitle:@"Quit" action:@selector(quit:) keyEquivalent:@"" atIndex:4] setTarget:self];
+	int index = 0;
+	_detailItem = [menu insertItemWithTitle:@"Used: Currently unknown." action:nil keyEquivalent:@"" atIndex:index++];
+	[[menu insertItemWithTitle:@"Check now" action:@selector(checkNow:) keyEquivalent:@"" atIndex:index++] setTarget:self];
+	[[menu insertItemWithTitle:@"FreedomPop Account..." action:@selector(goToAccount:) keyEquivalent:@"" atIndex:index++] setTarget:self];
+	[menu insertItem:[NSMenuItem separatorItem] atIndex:index++];
+	[[menu insertItemWithTitle:@"Settings..." action:@selector(showSettings:) keyEquivalent:@"" atIndex:index++] setTarget:self];
+	[[menu insertItemWithTitle:@"Quit" action:@selector(quit:) keyEquivalent:@"" atIndex:index++] setTarget:self];
 	
 	[_menubarView setMenu:menu];
 	
@@ -384,6 +386,11 @@ typedef enum
 		[_detailItem setTitle:[NSString stringWithFormat:@"Used: %3.1f%%", quotient * 100.f]];
 	else
 		[_detailItem setTitle:@"Used: Currently unknown."];
+}
+
+- (IBAction)checkNow:(id)sender
+{
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"checkNow" object:_model];
 }
 
 - (IBAction)goToAccount:(id)sender
@@ -460,8 +467,9 @@ typedef enum
 	
 	[self onUsedQuotientChanged:nil];
 	
-	[[super window] makeKeyAndOrderFront:self];
 	[[super window] setLevel:NSFloatingWindowLevel];
+	[NSApp activateIgnoringOtherApps:YES];
+	[[super window] makeKeyAndOrderFront:self];
 }
 
 - (IBAction)onUsernameChanged:(id)sender
@@ -493,9 +501,16 @@ typedef enum
 	_response = nil;
 	_updateImminent = NO;
 	
-	[self checkNow];
+	[self onCheckRequested:nil];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onModelChanged:) name:@"changed_account" object:_model];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onCheckRequested:) name:@"checkNow" object:_model];
+	
+	// preemptively request the user's password - this will cause the Keychain UI to pop up if not authorized.
+	//   this UX is much better than having it pop up a few seconds after the app starts because the user won't
+	//   associate it with the action of launching the app.
+	NSString* password = [_model password];
+	(void)password;
 	
 	return(self);
 }
@@ -508,11 +523,12 @@ typedef enum
 - (void)onModelChanged:(NSNotification*)notification
 {
 	printf("model changed!\n");
-	[self checkNow];
+	[self onCheckRequested:notification];
 }
 
-- (void)checkNow
+- (void)onCheckRequested:(NSNotification*)notification
 {
+	printf("check requested.\n");
 	_updateImminent = YES;
 	_timer = [NSTimer scheduledTimerWithTimeInterval:10.f target:self selector:@selector(performCheck:) userInfo:self repeats:NO];
 }
@@ -628,7 +644,7 @@ typedef enum
 		// accept up to 10 decimal digits
 		if((foundEnd.location != NSNotFound) && ((foundEnd.location - objectivePosition) < 10))
 		{
-			NSData* subData = [_response subdataWithRange:NSMakeRange(found.location, (foundEnd.location - found.location))];
+			NSData* subData = [_response subdataWithRange:NSMakeRange(objectivePosition, (foundEnd.location - objectivePosition))];
 			
 			int usedPercentage = [[[NSString alloc] initWithData:subData encoding:NSUTF8StringEncoding] intValue];
 			
