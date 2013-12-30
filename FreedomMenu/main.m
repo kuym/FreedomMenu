@@ -458,7 +458,10 @@ typedef enum
 	NSString* password = (username != nil)? [_model password] : @"";
 	[[self passwordField] setStringValue:(password != nil)? password : @""];
 	
+	[self onUsedQuotientChanged:nil];
+	
 	[[super window] makeKeyAndOrderFront:self];
+	[[super window] setLevel:NSFloatingWindowLevel];
 }
 
 - (IBAction)onUsernameChanged:(id)sender
