@@ -10,4 +10,6 @@ This widget lets you view your account data usage on the same computer you're us
 their plug-in USB device or via the FreedomPop WiFi hotspot device. The utility queries the FreedomPop web service
 directly, so **you do not need to be connected with a FreedomPop device for this to work.**
 
-**Currently under development**
+Uses [SSKeychain](https://github.com/samsoffes/sskeychain) from Sam Soffes.
+
+**Currently under development.**
