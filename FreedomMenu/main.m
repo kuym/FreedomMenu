@@ -110,11 +110,11 @@
 	FreedomModel* _model;
 }
 
-@property (weak) IBOutlet NSTextField*			usernameField;
-@property (weak) IBOutlet NSTextField*			passwordField;
-@property (weak) IBOutlet NSButton*				autoStartButton;
-@property (weak) IBOutlet NSLevelIndicator*		dataLevel;
-@property (weak) IBOutlet NSProgressIndicator*	indeterminateLevel;
+@property IBOutlet NSTextField*			usernameField;
+@property IBOutlet NSTextField*			passwordField;
+@property IBOutlet NSButton*			autoStartButton;
+@property IBOutlet NSLevelIndicator*	dataLevel;
+@property IBOutlet NSProgressIndicator*	indeterminateLevel;
 
 - (id)initWithModel:(FreedomModel*)model;
 
@@ -196,6 +196,56 @@ typedef enum
 	_menubarController = [[MenubarController alloc] initWithModel:_model];
 	
 	_checkController = [[UsageCheckController alloc] initWithModel:_model];
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onUpdateAutoStart:) name:@"changed_autostart" object:_model];
+}
+
+- (void)onUpdateAutoStart:(NSNotification*)notification
+{
+	LSSharedFileListRef loginItems = LSSharedFileListCreate(nil, kLSSharedFileListSessionLoginItems, nil);
+	
+	// take a snapshot of the existing login items
+	unsigned int ignore;
+	NSArray* loginItemsArray = (__bridge NSArray*)LSSharedFileListCopySnapshot(loginItems, &ignore);
+
+	// this is our path - we need to see if it exists in the login items
+	NSString* applicationPath = [[NSBundle mainBundle] bundlePath];
+	LSSharedFileListItemRef foundItem = nil;
+	
+	// try to find a login item for us
+	for(id item in loginItemsArray)
+	{
+		LSSharedFileListItemRef itemRef = (__bridge LSSharedFileListItemRef)item;
+		CFURLRef itemPath;
+		if(LSSharedFileListItemResolve(itemRef, 0, (CFURLRef*)&itemPath, nil) == noErr)
+		{
+			NSString* itemPathStr = [(__bridge NSURL*)itemPath path];
+			if([itemPathStr hasPrefix:applicationPath])
+			{
+				foundItem = itemRef;
+				break;
+			}
+		}
+	}
+	
+	if([_model autoStart])
+	{
+		if(foundItem == nil)
+		{
+			// add only if there's not already an item for us
+			CFURLRef launchPath = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+			foundItem = LSSharedFileListInsertItemURL(loginItems, kLSSharedFileListItemLast, nil, nil, launchPath, nil, nil);
+			CFRelease(launchPath);
+		}
+	}
+	else if(foundItem != nil)
+	{
+		//remove only if we're in the list
+		LSSharedFileListItemRemove(loginItems, foundItem);
+	}
+
+	if(foundItem != nil)
+		CFRelease(foundItem);
 }
 
 @end
@@ -226,8 +276,6 @@ typedef enum
 		return;
 	
 	[[NSUserDefaults standardUserDefaults] setObject:username forKey:@"username"];
-	
-	printf("setUsername\n");
 	
 	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed_username" object:self];
 	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed_account" object:self];
@@ -281,8 +329,6 @@ typedef enum
 	_password = password;
 	[SSKeychain setPassword:password forService:@"www.freedompop.com" account:u];
 	
-	
-	printf("setPassword\n");
 	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed_password" object:self];
 	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed_account" object:self];
 	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed" object:self];
@@ -459,13 +505,15 @@ typedef enum
 
 - (void)awakeFromNib
 {
+	[self onUsedQuotientChanged:nil];
+	
 	NSString* username = [_model username];
 	[[self usernameField] setStringValue:(username != nil)? username : @""];
 	
 	NSString* password = (username != nil)? [_model password] : @"";
 	[[self passwordField] setStringValue:(password != nil)? password : @""];
 	
-	[self onUsedQuotientChanged:nil];
+	[[self autoStartButton] setIntValue:[_model autoStart]];
 	
 	[[super window] setLevel:NSFloatingWindowLevel];
 	[NSApp activateIgnoringOtherApps:YES];
@@ -522,13 +570,11 @@ typedef enum
 
 - (void)onModelChanged:(NSNotification*)notification
 {
-	printf("model changed!\n");
 	[self onCheckRequested:notification];
 }
 
 - (void)onCheckRequested:(NSNotification*)notification
 {
-	printf("check requested.\n");
 	_updateImminent = YES;
 	_timer = [NSTimer scheduledTimerWithTimeInterval:10.f target:self selector:@selector(performCheck:) userInfo:self repeats:NO];
 }
@@ -556,16 +602,16 @@ typedef enum
 	
 	if((username == nil) || (password == nil))
 	{
-		printf("unable to check, no username or password.\n");
+		NSLog(@"FreedomMenu error: Unable to check due to there being no username or password set.\n");
 		return;
 	}
-		
+	
 	NSMutableURLRequest* request = [[NSMutableURLRequest alloc] init];
 	[request setURL:[NSURL URLWithString:@"https://www.freedompop.com/login.htm"]];
 	[request setHTTPMethod:@"POST"];
 	[request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
 	
-	NSString* post = [NSString stringWithFormat: @"signin-username-full=%@&signin-password-full=%@&destinationURL=http://www.freedompop.com/acct_usage.htm&requestOrigin=",
+	NSString* post = [		NSString stringWithFormat: @"signin-username-full=%@&signin-password-full=%@&destinationURL=http://www.freedompop.com/acct_usage.htm&requestOrigin=",
 							[username urlencode],
 							[password urlencode]
 						];
@@ -584,7 +630,7 @@ typedef enum
 {
 	[_model setUsedQuotient:-1.f];
 	
-	printf("error.\n");
+	NSLog(@"FreedomMenu error: Unable to check account status.\n");
 }
 
 - (NSURLRequest*)connection:(NSURLConnection*)connection willSendRequest:(NSURLRequest*)request redirectResponse:(NSURLResponse*)response

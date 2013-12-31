@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13A603" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13A603" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
+        <deployment defaultVersion="1060" identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
     </dependencies>
     <objects>
@@ -24,7 +25,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="490" height="357"/>
                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                 <subviews>
-                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="L0m-T9-WWB">
+                    <button id="L0m-T9-WWB">
                         <rect key="frame" x="190" y="18" width="225" height="18"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="check" title="Start automatically when I log in" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="8YU-ca-1H7">
@@ -35,7 +36,7 @@
                             <action selector="onAutoStartChanged:" target="-2" id="fow-QW-N3L"/>
                         </connections>
                     </button>
-                    <secureTextField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fnq-99-z3Y">
+                    <secureTextField verticalHuggingPriority="750" id="fnq-99-z3Y">
                         <rect key="frame" x="192" y="59" width="221" height="28"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" placeholderString="password" drawsBackground="YES" usesSingleLineMode="YES" id="Pd8-xB-Paz">
@@ -51,7 +52,7 @@
                             <outlet property="nextKeyView" destination="L0m-T9-WWB" id="lKr-jJ-7qR"/>
                         </connections>
                     </secureTextField>
-                    <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fvg-NB-SeI">
+                    <textField verticalHuggingPriority="750" id="fvg-NB-SeI">
                         <rect key="frame" x="192" y="102" width="221" height="28"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="email@address.com" drawsBackground="YES" id="1G4-jQ-aeF">
@@ -64,7 +65,7 @@
                             <outlet property="nextKeyView" destination="fnq-99-z3Y" id="TM0-WD-D5y"/>
                         </connections>
                     </textField>
-                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yH0-x8-RWp">
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="yH0-x8-RWp">
                         <rect key="frame" x="33" y="106" width="153" height="19"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Account name" id="bMI-XR-Lpt">
@@ -73,7 +74,7 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1Vl-sh-Vvg">
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="1Vl-sh-Vvg">
                         <rect key="frame" x="33" y="202" width="153" height="19"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Data Remaining" id="oN2-vM-GhK">
@@ -82,7 +83,7 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bZY-0c-6qN">
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="bZY-0c-6qN">
                         <rect key="frame" x="33" y="63" width="153" height="19"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Account password" id="dbC-Ka-KHG">
@@ -91,24 +92,24 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <levelIndicator hidden="YES" focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eBy-R7-ihG">
+                    <levelIndicator hidden="YES" focusRingType="none" verticalHuggingPriority="750" id="eBy-R7-ihG">
                         <rect key="frame" x="192" y="201" width="221" height="18"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <levelIndicatorCell key="cell" focusRingType="none" alignment="left" doubleValue="8" maxValue="8" warningValue="4" criticalValue="2" id="dSH-hh-dzk"/>
                     </levelIndicator>
-                    <box autoresizesSubviews="NO" verticalHuggingPriority="750" fixedFrame="YES" title="Box" boxType="separator" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="ouS-bG-dck">
-                        <rect key="frame" x="0.0" y="152" width="490" height="5"/>
+                    <box autoresizesSubviews="NO" verticalHuggingPriority="750" title="Box" boxType="separator" titlePosition="noTitle" id="ouS-bG-dck">
+                        <rect key="frame" x="0.0" y="152" width="490" height="4"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
                         <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                         <font key="titleFont" metaFont="system"/>
                     </box>
-                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5z9-uN-1CA">
+                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" id="5z9-uN-1CA">
                         <rect key="frame" x="43" y="285" width="198" height="39"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="logo" id="dJb-pH-a4Y"/>
                     </imageView>
-                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Jgc-r6-74c">
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="Jgc-r6-74c">
                         <rect key="frame" x="18" y="247" width="454" height="17"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="A Menu Bar monitor for your FreedomPop account." id="Oxe-IE-AiH">
@@ -117,12 +118,12 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="s0l-LQ-Bin">
+                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" id="s0l-LQ-Bin">
                         <rect key="frame" x="257" y="272" width="190" height="65"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="FreedomStick" id="wQt-46-aBY"/>
                     </imageView>
-                    <progressIndicator focusRingType="none" fixedFrame="YES" maxValue="100" indeterminate="YES" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="3Zf-6Q-oLb">
+                    <progressIndicator focusRingType="none" maxValue="100" indeterminate="YES" style="bar" id="3Zf-6Q-oLb">
                         <rect key="frame" x="192" y="201" width="221" height="20"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     </progressIndicator>

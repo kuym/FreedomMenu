@@ -18,20 +18,8 @@
 		E812590F1871543A00914BCE /* SettingsWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E812590E1871543A00914BCE /* SettingsWindow.xib */; };
 		E8463EEF186D5D0C00D59500 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8463EEE186D5D0C00D59500 /* Cocoa.framework */; };
 		E8463EF9186D5D0C00D59500 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E8463EF7186D5D0C00D59500 /* InfoPlist.strings */; };
-		E8463F0E186D5D0C00D59500 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8463F0D186D5D0C00D59500 /* XCTest.framework */; };
-		E8463F0F186D5D0C00D59500 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8463EEE186D5D0C00D59500 /* Cocoa.framework */; };
 		E8463F23186D663F00D59500 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E8463F22186D663F00D59500 /* main.m */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		E8463F10186D5D0C00D59500 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E8463EE3186D5D0C00D59500 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = E8463EEA186D5D0C00D59500;
-			remoteInfo = FreedomMenu;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		E80877B6186DFF7F00FAA8E6 /* Status.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Status.png; path = FreedomMenu/Status.png; sourceTree = "<group>"; };
@@ -51,7 +39,6 @@
 		E8463EF3186D5D0C00D59500 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E8463EF6186D5D0C00D59500 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E8463EF8186D5D0C00D59500 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		E8463F0C186D5D0C00D59500 /* FreedomMenuTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FreedomMenuTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8463F0D186D5D0C00D59500 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		E8463F22186D663F00D59500 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -63,15 +50,6 @@
 			files = (
 				E812590A187003A000914BCE /* Security.framework in Frameworks */,
 				E8463EEF186D5D0C00D59500 /* Cocoa.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E8463F09186D5D0C00D59500 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				E8463F0F186D5D0C00D59500 /* Cocoa.framework in Frameworks */,
-				E8463F0E186D5D0C00D59500 /* XCTest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -106,7 +84,6 @@
 			isa = PBXGroup;
 			children = (
 				E8463EEB186D5D0C00D59500 /* FreedomMenu.app */,
-				E8463F0C186D5D0C00D59500 /* FreedomMenuTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -164,24 +141,6 @@
 			productReference = E8463EEB186D5D0C00D59500 /* FreedomMenu.app */;
 			productType = "com.apple.product-type.application";
 		};
-		E8463F0B186D5D0C00D59500 /* FreedomMenuTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = E8463F1F186D5D0C00D59500 /* Build configuration list for PBXNativeTarget "FreedomMenuTests" */;
-			buildPhases = (
-				E8463F08186D5D0C00D59500 /* Sources */,
-				E8463F09186D5D0C00D59500 /* Frameworks */,
-				E8463F0A186D5D0C00D59500 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				E8463F11186D5D0C00D59500 /* PBXTargetDependency */,
-			);
-			name = FreedomMenuTests;
-			productName = FreedomMenuTests;
-			productReference = E8463F0C186D5D0C00D59500 /* FreedomMenuTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -190,11 +149,6 @@
 			attributes = {
 				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = Outbreak;
-				TargetAttributes = {
-					E8463F0B186D5D0C00D59500 = {
-						TestTargetID = E8463EEA186D5D0C00D59500;
-					};
-				};
 			};
 			buildConfigurationList = E8463EE6186D5D0C00D59500 /* Build configuration list for PBXProject "FreedomMenu" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -210,7 +164,6 @@
 			projectRoot = "";
 			targets = (
 				E8463EEA186D5D0C00D59500 /* FreedomMenu */,
-				E8463F0B186D5D0C00D59500 /* FreedomMenuTests */,
 			);
 		};
 /* End PBXProject section */
@@ -231,13 +184,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E8463F0A186D5D0C00D59500 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -250,22 +196,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E8463F08186D5D0C00D59500 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		E8463F11186D5D0C00D59500 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = E8463EEA186D5D0C00D59500 /* FreedomMenu */;
-			targetProxy = E8463F10186D5D0C00D59500 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		E8463EF7186D5D0C00D59500 /* InfoPlist.strings */ = {
@@ -354,6 +285,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				INFOPLIST_FILE = FreedomMenu/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -366,48 +298,9 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				INFOPLIST_FILE = FreedomMenu/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
-			};
-			name = Release;
-		};
-		E8463F20186D5D0C00D59500 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/FreedomMenu.app/Contents/MacOS/FreedomMenu";
-				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-					"$(inherited)",
-				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "FreedomMenu/FreedomMenu-Prefix.pch";
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = "FreedomMenuTests/FreedomMenuTests-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = xctest;
-			};
-			name = Debug;
-		};
-		E8463F21186D5D0C00D59500 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/FreedomMenu.app/Contents/MacOS/FreedomMenu";
-				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-					"$(inherited)",
-				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "FreedomMenu/FreedomMenu-Prefix.pch";
-				INFOPLIST_FILE = "FreedomMenuTests/FreedomMenuTests-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = xctest;
 			};
 			name = Release;
 		};
@@ -428,15 +321,6 @@
 			buildConfigurations = (
 				E8463F1D186D5D0C00D59500 /* Debug */,
 				E8463F1E186D5D0C00D59500 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		E8463F1F186D5D0C00D59500 /* Build configuration list for PBXNativeTarget "FreedomMenuTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				E8463F20186D5D0C00D59500 /* Debug */,
-				E8463F21186D5D0C00D59500 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
