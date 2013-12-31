@@ -216,9 +216,12 @@ typedef enum
 	for(id item in loginItemsArray)
 	{
 		LSSharedFileListItemRef itemRef = (__bridge LSSharedFileListItemRef)item;
-		CFURLRef itemPath;
-		if(LSSharedFileListItemResolve(itemRef, 0, (CFURLRef*)&itemPath, nil) == noErr)
+		CFURLRef itemPath = nil;
+		if(LSSharedFileListItemResolve(itemRef, kLSSharedFileListDoNotMountVolumes, (CFURLRef*)&itemPath, nil) == noErr)
 		{
+			if(itemPath == nil)
+				continue;
+			
 			NSString* itemPathStr = [(__bridge NSURL*)itemPath path];
 			if([itemPathStr hasPrefix:applicationPath])
 			{
