@@ -13,4 +13,8 @@ directly, so **you do not need to be connected with a FreedomPop device for this
 Uses [SSKeychain](https://github.com/samsoffes/sskeychain) from Sam Soffes.
 
 ## Status
-**Alpha** - Feature-complete and works correctly, may have bugs.
+**Beta** - Feature-complete and works correctly. No known bugs.
+
+## Still needs
+* Application Icon
+* Signed application bundle with a developer identity
