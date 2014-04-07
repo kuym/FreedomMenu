@@ -53,10 +53,6 @@
 
 
 @interface FreedomModel: NSObject
-{
-	float				_usedQuotient;
-	NSString*			_password;
-}
 
 - (NSString*)username;
 - (void)setUsername:(NSString*)username;
@@ -72,6 +68,9 @@
 
 - (float)usedQuotient;
 - (void)setUsedQuotient:(float)usedQuotient;
+
+- (int)planData;
+- (void)setPlanData:(int)planDataBytes;
 
 @end
 
@@ -114,6 +113,7 @@
 @property IBOutlet NSTextField*			passwordField;
 @property IBOutlet NSButton*			autoStartButton;
 @property IBOutlet NSLevelIndicator*	dataLevel;
+@property IBOutlet NSTextField*			dataRemainingLabel;
 @property IBOutlet NSProgressIndicator*	indeterminateLevel;
 
 - (id)initWithModel:(FreedomModel*)model;
@@ -258,10 +258,16 @@ typedef enum
 
 
 @implementation FreedomModel
+{
+	float				_usedQuotient;
+	NSString*			_password;
+	int					_planData;
+}
 
 - (id)init
 {
 	_usedQuotient = -1.f;
+	_planData = -1;
 	
 	return(self);
 }
@@ -381,6 +387,17 @@ typedef enum
 	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed" object:self];
 }
 
+- (int)planData
+{
+	return(_planData);
+}
+
+- (void)setPlanData:(int)planDataBytes
+{
+	_planData = planDataBytes;
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed_planData" object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"changed" object:self];
+}
 
 @end
 
@@ -432,9 +449,9 @@ typedef enum
 	[_menubarView setDisplayedQuotient:quotient];
 	
 	if(quotient >= 0.f)
-		[_detailItem setTitle:[NSString stringWithFormat:@"Used: %3.1f%%", quotient * 100.f]];
+		[_detailItem setTitle:[NSString stringWithFormat:@"Remaining: %3.1f%%", (1 - quotient) * 100.f]];
 	else
-		[_detailItem setTitle:@"Used: Currently unknown."];
+		[_detailItem setTitle:@"Remaining: Currently unknown."];
 }
 
 - (IBAction)checkNow:(id)sender
@@ -491,12 +508,24 @@ typedef enum
 	if(quotient >= 0.f)
 	{
 		[[self dataLevel] setIntegerValue:(int)(10.f * (1.f - quotient))];
+		
+		float total = (float)[_model planData];
+		if(total >= 0.f)
+		{
+			float remaining = total * (1 - quotient);
+			[[self dataRemainingLabel] setStringValue:[NSString stringWithFormat:@"%.0fMB / %.0fMB", remaining / 1048576.f, total / 1048576.f]];
+			[[self dataRemainingLabel]  setHidden:NO];
+		}
+		else
+			[[self dataRemainingLabel]  setHidden:YES];
+		
 		[[self dataLevel] setHidden:NO];
 		[[self indeterminateLevel] setHidden:YES];
 	}
 	else
 	{
 		[[self indeterminateLevel] setHidden:NO];
+		[[self dataRemainingLabel]  setHidden:YES];
 		[[self dataLevel] setHidden:YES];
 	}
 }
@@ -676,40 +705,67 @@ typedef enum
 	
 	_connection = nil;
 	
-	char const* searchString = "<div class=\"colorBar\" style=\"width:";
-	size_t searchStringLen = strlen(searchString);
-	NSData* htmlNodeOfInterest = [NSData dataWithBytes:searchString length:searchStringLen];
+	NSString* usedPercentageStr = [self findStringInResponseWithLeader:"<div class=\"colorBar\" style=\"width:" andTrailer:"%" maxLength:10];
+	int usedPercentage = (usedPercentageStr != nil)? [usedPercentageStr intValue] : -1;
+	
+	if((usedPercentage >= 0) && (usedPercentage <= 100))
+	{
+		[_model setUsedQuotient:(((float)usedPercentage) / 100.f)];
+	}
+	else
+		[_model setUsedQuotient: -1.f];
+
+	NSString* planDataStr = [self findStringInResponseWithLeader:"id=\"planPerMonthDataAmount\">" andTrailer:"<" maxLength:10];
+	int planData = (planDataStr != nil)? [planDataStr intValue] * 1045876 : -1;
+	
+	NSString* bonusDataStr = [self findStringInResponseWithLeader:"class=\"bandwidthNumber\">" andTrailer:"<" maxLength:10];
+	int bonusData = (bonusDataStr != nil)? [bonusDataStr intValue] * 1045876 : -1;
+	
+	int totalData = -1;
+	if(planData >= 0)
+	{
+		if(totalData < 0)	totalData = 0;
+		totalData += planData;
+	}
+	if(bonusData >= 0)
+	{
+		if(totalData < 0)	totalData = 0;
+		totalData += bonusData;
+	}
+	
+	if(totalData >= 0)
+	{
+		[_model setPlanData:totalData];
+	}
+	else
+		[_model setPlanData: -1.f];
+	
+	_response = nil;
+	
+}
+
+- (NSString*)findStringInResponseWithLeader:(char const*)leader andTrailer:(char const*)trailer maxLength:(unsigned int)maxLength
+{
+	size_t leaderLen = strlen(leader);
+	NSData* htmlNodeOfInterest = [NSData dataWithBytes:leader length:leaderLen];
 	NSRange found = [_response rangeOfData:htmlNodeOfInterest options:0 range:NSMakeRange(0, [_response length])];
 	
-	BOOL valid = NO;
 	if(found.location != NSNotFound)
 	{
-		//printf("found at %lu, %lu\n", (unsigned long)found.location, (unsigned long)found.length);
-		
-		NSData* endMarker = [NSData dataWithBytes:"%" length:1];
-		size_t objectivePosition = found.location + searchStringLen;
+		size_t trailerLen = strlen(trailer);
+		NSData* endMarker = [NSData dataWithBytes:trailer length:trailerLen];
+		size_t objectivePosition = found.location + leaderLen;
 		NSRange foundEnd = [_response rangeOfData:endMarker options:0 range:NSMakeRange(objectivePosition, [_response length] - objectivePosition)];
 		
-		// accept up to 10 decimal digits
-		if((foundEnd.location != NSNotFound) && ((foundEnd.location - objectivePosition) < 10))
+		if((foundEnd.location != NSNotFound) && ((foundEnd.location - objectivePosition) < maxLength))
 		{
 			NSData* subData = [_response subdataWithRange:NSMakeRange(objectivePosition, (foundEnd.location - objectivePosition))];
 			
-			int usedPercentage = [[[NSString alloc] initWithData:subData encoding:NSUTF8StringEncoding] intValue];
-			
-			if((usedPercentage >= 0) && (usedPercentage <= 100))
-			{
-				[_model setUsedQuotient:(((float)usedPercentage) / 100.f)];
-				valid = YES;
-			}
+			return([[NSString alloc] initWithData:subData encoding:NSUTF8StringEncoding]);
 		}
 	}
-	_response = nil;
-	
-	if(!valid)
-		[_model setUsedQuotient: -1.f];
+	return(nil);
 }
-
 
 @end
 
